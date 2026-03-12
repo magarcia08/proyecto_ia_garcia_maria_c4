@@ -1,0 +1,2111 @@
+{
+  "name": "HelpDeskBot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "ec891fab-a087-4dbd-9ae3-8906d503fe60",
+      "name": "📩 Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1392,
+        192
+      ],
+      "webhookId": "426d2908-cf29-4da6-9dfc-3f7cf00b31a3",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $input.first().json;\nconst chatId = msg?.message?.chat?.id || msg?.callback_query?.message?.chat?.id;\nconst userId = msg?.message?.from?.id || msg?.callback_query?.from?.id;\nconst firstName = msg?.message?.from?.first_name || msg?.callback_query?.from?.first_name || 'Usuario';\nconst username = msg?.message?.from?.['username'] || msg?.callback_query?.from?.['username'] || msg?.message?.from?.first_name || String(userId) || 'sin_usuario';\nconst text = msg?.message?.text?.trim() || msg?.callback_query?.data || '';\nreturn [{ json: { chatId, userId: String(userId), username, firstName, text } }];"
+      },
+      "id": "150aa863-ba03-4445-a8a6-c067ecf646d4",
+      "name": "🔧 Extraer Datos del Mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1GrtwDQwIAVlemDrCG9CtP5LAmzg2VuUGt2lrl3H6sgs",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "USUARIOS",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telegram_user": "={{ $('🔧 Extraer Datos del Mensaje').item.json.username }}",
+            "nombre": "={{ $('🔧 Extraer Datos del Mensaje').item.json.firstName }}",
+            "rol": "empleado",
+            "activo": "TRUE"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "telegram_user",
+              "displayName": "telegram_user",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "rol",
+              "displayName": "rol",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "activo",
+              "displayName": "activo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sesion",
+              "displayName": "sesion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sesion_data",
+              "displayName": "sesion_data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "6c7d3cd9-d43d-4164-af5f-10400a338231",
+      "name": "📋 Sheets: Buscar Usuario",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        -992,
+        192
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.telegram_user || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0d8c4684-c3e0-42b5-85dc-1f8a6dcfefc7",
+      "name": "🔀 IF: ¿Usuario Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        192
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "USUARIOS",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "50d6b437-b576-4888-8b7b-f079fc5982fd",
+      "name": "📊 Sheets: Registrar Nuevo Usuario",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        -592,
+        352
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.activo || 'FALSE' }}",
+              "rightValue": "TRUE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d0c7dabd-3367-4a61-a277-e87775eb4fc5",
+      "name": "🔀 IF: ¿Usuario Activo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -592,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────\n// GESTOR DE SESIÓN — lee estado desde Google Sheets\n// ─────────────────────────────────────────────────\nconst extraer = $('🔧 Extraer Datos del Mensaje').first().json;\nconst text = extraer.text.trim();\nconst sesion = $json.sesion || '';\nlet sesionData = {};\ntry { sesionData = JSON.parse($json.sesion_data || '{}'); } catch(e) {}\n\n// Comandos que siempre resetean la sesión\nconst resetCmds = ['/start', 'inicio', 'hola', 'menu', '/menu'];\nif (resetCmds.includes(text.toLowerCase())) {\n  return [{ json: { ...extraer, currentScreen: 'MENU_PRINCIPAL', sesion: '', sesionData: {}, inputText: text, rowNumber: $json.row_number } }];\n}\n\n// Si hay sesión activa → continuar wizard\nif (sesion === 'ESPERANDO_TIPO')         return [{ json: { ...extraer, currentScreen: 'RECIBIR_TIPO',          sesion, sesionData, inputText: text, rowNumber: $json.row_number } }];\nif (sesion === 'ESPERANDO_PRIORIDAD')    return [{ json: { ...extraer, currentScreen: 'RECIBIR_PRIORIDAD',     sesion, sesionData, inputText: text, rowNumber: $json.row_number } }];\nif (sesion === 'ESPERANDO_DESCRIPCION')  return [{ json: { ...extraer, currentScreen: 'RECIBIR_DESCRIPCION',  sesion, sesionData, inputText: text, rowNumber: $json.row_number } }];\nif (sesion === 'ESPERANDO_CONFIRMACION') return [{ json: { ...extraer, currentScreen: 'RECIBIR_CONFIRMACION', sesion, sesionData, inputText: text, rowNumber: $json.row_number } }];\nif (sesion === 'ESPERANDO_TICKET_ID')    return [{ json: { ...extraer, currentScreen: 'RECIBIR_TICKET_ID',    sesion, sesionData, inputText: text, rowNumber: $json.row_number } }];\n\n// Sin sesión → menú normal\nconst screenMap = { '0':'AYUDA','1':'CREAR_TIPO','2':'CONSULTAR_ESTADO','3':'MIS_SOLICITUDES','4':'REPORTES','5':'CONFIGURACION' };\nreturn [{ json: { ...extraer, currentScreen: screenMap[text] || 'TEXTO_LIBRE', sesion: '', sesionData: {}, inputText: text, rowNumber: $json.row_number } }];"
+      },
+      "id": "99d379de-92de-4ba1-abaa-91ab90b59099",
+      "name": "🧠 Gestor de Sesión",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "MENU_PRINCIPAL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "CREAR_TIPO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "RECIBIR_TIPO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "RECIBIR_PRIORIDAD",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "RECIBIR_DESCRIPCION",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "RECIBIR_CONFIRMACION",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "CONSULTAR_ESTADO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "RECIBIR_TICKET_ID",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "MIS_SOLICITUDES",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "REPORTES",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "AYUDA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "5e6af4b3-aa3b-40c9-aa87-dadc7211fe7e",
+      "name": "🔀 Switch: Router Principal",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -192,
+        80
+      ],
+      "notes": "Un solo Switch reemplaza todos los IF encadenados — evita el problema de múltiples ejecuciones"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "Hola *{{ $json.firstName }}* 👋, soy *HelpDeskBot*\n\nEscribe el número de la opción:\n\n`0.` 🆘 Ayuda\n`1.` ➕ Crear solicitud\n`2.` 🔍 Consultar estado\n`3.` 📂 Mis solicitudes\n`4.` 📊 Reportes\n`5.` ⚙️ Configuración",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "aa7dd84f-6119-4e52-b660-1e03cd6b6786",
+      "name": "📤 Telegram: Menú Principal",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        -320
+      ],
+      "webhookId": "c1150d4e-d2df-4d1b-8120-8329b8ad469a",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "USUARIOS",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "=telegram_user",
+              "lookupValue": "={{ $json.username }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1bb9ff18-40c4-48b3-b414-fc1100420caf",
+      "name": "📊 Sheets: Guardar Sesión TIPO",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        32,
+        -112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Guarda sesion=ESPERANDO_TIPO para que el próximo mensaje sepa que está en el wizard"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.inputText;\nconst tipoMap = { '1': 'Soporte técnico', '2': 'Solicitud administrativa', '3': 'Consulta general' };\n\nif (text === '9') return [{ json: { ...$json, currentScreen: 'CANCELAR' } }];\nif (!tipoMap[text]) return [{ json: { ...$json, currentScreen: 'TIPO_INVALIDO' } }];\n\nconst sesionData = { ...($json.sesionData || {}), tipo: tipoMap[text] };\nreturn [{ json: { ...$json, currentScreen: 'TIPO_OK', sesionData } }];"
+      },
+      "id": "16f53f19-963d-4ab6-8485-7cc39d94503c",
+      "name": "🔧 Procesar Tipo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "TIPO_OK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "TIPO_INVALIDO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "CANCELAR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b527c2f8-0cad-45f4-9728-c04aa9f0da08",
+      "name": "🔀 Switch: ¿Tipo Válido?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        240,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "⚠️ Opción inválida. Escribe *1*, *2* o *3*, o *9* para cancelar.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "65f6fcd0-b715-4ac7-8667-80311042c106",
+      "name": "📤 Telegram: Tipo Inválido",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        -16
+      ],
+      "webhookId": "782f6cd6-e68f-4f1e-a3ac-2190acde5595",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.inputText;\nconst prioMap = { '1': 'Alta', '2': 'Media', '3': 'Baja' };\n\nif (text === '9') return [{ json: { ...$json, currentScreen: 'CANCELAR' } }];\nif (!prioMap[text]) return [{ json: { ...$json, currentScreen: 'PRIO_INVALIDA' } }];\n\nconst sesionData = { ...($json.sesionData || {}), prioridad: prioMap[text] };\nreturn [{ json: { ...$json, currentScreen: 'PRIO_OK', sesionData } }];"
+      },
+      "id": "d70e6e76-c671-4754-9db7-33b09ff71ff7",
+      "name": "🔧 Procesar Prioridad",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "PRIO_OK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "PRIO_INVALIDA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "CANCELAR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f932cb76-8705-4ad6-87e3-e16cb27224a9",
+      "name": "🔀 Switch: ¿Prioridad Válida?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        784,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "⚠️ Prioridad inválida. Escribe *1* (Alta), *2* (Media) o *3* (Baja).",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "f70d27b3-643b-4238-83d9-c0cf56207353",
+      "name": "📤 Telegram: Prioridad Inválida",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        592
+      ],
+      "webhookId": "812cd5c5-eacc-47f2-8986-38fdbde1540d",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "USUARIOS",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "telegram_user",
+              "lookupValue": "={{ $json.username }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ef98a7b8-c184-4579-b0be-e19bb84c12d3",
+      "name": "📊 Sheets: Guardar Sesión DESCRIPCION",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        64
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "✅ Prioridad: *{{ $json.sesionData.prioridad }}*\n\n📝 Escribe la *descripción* del problema:\n_(Mínimo 10 caracteres)_",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "7eb06447-2ba6-47d8-8a24-22b824115833",
+      "name": "📤 Telegram: Pedir Descripción",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        -96
+      ],
+      "webhookId": "99a639f2-5673-4c2f-8101-2f7e6d06965d",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.inputText;\n\nif (text === '9') return [{ json: { ...$json, currentScreen: 'CANCELAR' } }];\nif (text.length < 10) return [{ json: { ...$json, currentScreen: 'DESC_CORTA' } }];\n\nconst sesionData = { ...($json.sesionData || {}), descripcion: text };\nreturn [{ json: { ...$json, currentScreen: 'DESC_OK', sesionData } }];"
+      },
+      "id": "ab929afd-bd9e-4fed-84a5-35e67846c2f3",
+      "name": "🔧 Procesar Descripción",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "DESC_OK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "DESC_CORTA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "CANCELAR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7ea4f51f-8676-4da4-ad9c-4119062b76f7",
+      "name": "🔀 Switch: ¿Desc Válida?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1136,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "⚠️ Descripción muy corta. Escribe al menos 10 caracteres.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "ebe3f40d-301a-4b4f-b352-77ce44237e85",
+      "name": "📤 Telegram: Desc Corta",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1360,
+        144
+      ],
+      "webhookId": "67db83c8-3d58-4168-a4ab-8770f356e826",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const sd = $json.sesionData || {};\nconst ticketId = 'TK-' + Date.now().toString().slice(-6);\nconst fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });\nconst sesionData = { ...sd, ticketId, fecha };\nreturn [{ json: { ...$json, sesionData } }];"
+      },
+      "id": "f1b21b1f-8aeb-4138-bccc-9605e8771a2f",
+      "name": "🔧 Preparar Ticket",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "USUARIOS",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "telegram_user",
+              "lookupValue": "={{ $json.username }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "33de7d8b-7bc4-44e4-b95a-690d6c29985a",
+      "name": "📊 Sheets: Guardar Sesión CONFIRMACION",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "📋 *Confirmar Solicitud*\n\n🎫 Ticket: `{{ $json.sesionData.ticketId }}`\n📌 Tipo: {{ $json.sesionData.tipo }}\n⚡ Prioridad: {{ $json.sesionData.prioridad }}\n📝 Descripción: {{ $json.sesionData.descripcion }}\n📅 Fecha: {{ $json.sesionData.fecha }}\n\n¿Confirmas?\n`1.` ✅ Sí, guardar\n`2.` ❌ Cancelar",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "050ffa63-4f6e-42fe-b75e-028cc9be654f",
+      "name": "📤 Telegram: Confirmar",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        0
+      ],
+      "webhookId": "916068e4-6b35-4c37-b0d6-2160e32473c2",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.inputText;\nif (text === '1') return [{ json: { ...$json, currentScreen: 'CONFIRMAR_OK' } }];\nreturn [{ json: { ...$json, currentScreen: 'CANCELAR' } }];"
+      },
+      "id": "2a9bd168-02b8-4d57-b2bf-b63a1f78ce3f",
+      "name": "🔧 Procesar Confirmación",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "CONFIRMAR_OK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.currentScreen }}",
+                    "rightValue": "CANCELAR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "865b0b80-9439-4d65-8c31-01acd2020481",
+      "name": "🔀 Switch: ¿Confirmado?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1760,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "SOLICITUDES",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "f6ea1896-2649-4abc-974e-5694e8e14af3",
+      "name": "📊 Sheets: Guardar Ticket",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        2016,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "USUARIOS",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "telegram_user",
+              "lookupValue": "={{ $json.username }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "06dbf6e1-dab4-49c9-a048-57eafbdc4797",
+      "name": "📊 Sheets: Limpiar Sesión",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        2240,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Limpia la sesión después de guardar el ticket"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "✅ *¡Solicitud registrada!*\n\n🎫 Ticket: `{{ $json.sesionData.ticketId }}`\n\nRecibirás una notificación cuando haya avances.\n_Tiempo estimado: 24–48 horas hábiles._\n\nEscribe /start para volver al menú.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "44cf26f3-b11d-4208-8334-40bd94d879fb",
+      "name": "📤 Telegram: Ticket OK",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2464,
+        0
+      ],
+      "webhookId": "6b625b28-0f88-4e16-b217-7120055507bc",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "🔍 *Consultar Estado*\n\nEscribe el número de ticket:\n_Ejemplo:_ `TK-123456`\n\nO escribe `9` para cancelar.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "ee3fee3c-2ba2-421f-8aa0-2f4431518700",
+      "name": "📤 Telegram: Pedir Ticket ID",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        224
+      ],
+      "webhookId": "7a5bc493-9688-4180-89b4-230f19af9f4e",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "SOLICITUDES",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "id_ticket",
+              "lookupValue": "={{ $json.inputText }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d3e5c987-1789-4e45-af14-ebc7ced5860e",
+      "name": "📊 Sheets: Buscar Ticket",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        32,
+        416
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.id_ticket || '' }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "70fc7cc4-57f9-4fa7-a1ec-0a6227dba244",
+      "name": "🔀 Switch: ¿Ticket Existe?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        240,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst chatId = $('🔧 Extraer Datos del Mensaje').first().json.chatId;\nconst nombre = $('🔧 Extraer Datos del Mensaje').first().json.firstName;\n\nconst validos = items.filter(i => i.json.id_ticket);\nif (validos.length === 0) {\n  return [{ json: { chatId, text: `📭 *Mis Solicitudes*\\n\\nHola ${nombre}, aún no tienes solicitudes.\\n\\nEscribe /start para volver al menú.` } }];\n}\n\nlet msg = `📂 *Mis Solicitudes – ${nombre}*\\n\\n`;\nvalidos.slice(0,10).forEach((item, i) => {\n  const t = item.json;\n  const e = t.estado==='Abierto'?'🟢':t.estado==='En proceso'?'🟡':'⚫';\n  msg += `*${i+1}.* \\`${t.id_ticket}\\`\\n   📌 ${t.tipo}\\n   ${e} ${t.estado} | ⚡ ${t.prioridad}\\n\\n`;\n});\nmsg += 'Escribe /start para volver al menú.';\nreturn [{ json: { chatId, text: msg } }];"
+      },
+      "id": "88b9a1b8-c926-4dac-88e9-da8409c06a63",
+      "name": "🔧 Formatear Mis Tickets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "e336d5f4-6466-481a-a5ae-6dd57e083d03",
+      "name": "📤 Telegram: Mis Tickets",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        800
+      ],
+      "webhookId": "dab1b415-33b9-4e90-9a47-bae649254cee",
+      "credentials": {
+        "telegramApi": {
+          "id": "9zvcB4Qz8DGXLDcL",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst chatId = $('🔧 Extraer Datos del Mensaje').first().json.chatId;\nconst fecha = new Date().toLocaleDateString('es-CO');\nconst v = items.filter(i => i.json.id_ticket);\nconst total = v.length;\nconst abiertos  = v.filter(i=>i.json.estado==='Abierto').length;\nconst enProceso = v.filter(i=>i.json.estado==='En proceso').length;\nconst cerrados  = v.filter(i=>i.json.estado==='Cerrado').length;\nconst alta  = v.filter(i=>i.json.prioridad==='Alta').length;\nconst media = v.filter(i=>i.json.prioridad==='Media').length;\nconst baja  = v.filter(i=>i.json.prioridad==='Baja').length;\nconst text = `📊 *Reporte General*\\n📅 _${fecha}_\\n\\n*Total:* ${total}\\n\\n*Por estado:*\\n🟢 Abiertos: ${abiertos}\\n🟡 En proceso: ${enProceso}\\n⚫ Cerrados: ${cerrados}\\n\\n*Por prioridad:*\\n🔴 Alta: ${alta}\\n🟡 Media: ${media}\\n🟢 Baja: ${baja}\\n\\nEscribe /start para volver al menú.`;\nreturn [{ json: { chatId, text } }];"
+      },
+      "id": "f661fa85-122c-4e8c-8fff-a0f0b283643b",
+      "name": "🔧 Calcular Reporte",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "5daf6850-a36d-422e-911d-95bca8f293c0",
+      "name": "📤 Telegram: Reporte",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        496,
+        992
+      ],
+      "webhookId": "3abd6cb3-923b-427d-aaa2-466144b849a0",
+      "credentials": {
+        "telegramApi": {
+          "id": "9zvcB4Qz8DGXLDcL",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "🆘 *Centro de Ayuda*\n\n`1` → Crear nueva solicitud\n`2` → Consultar estado de ticket\n`3` → Ver mis solicitudes\n`4` → Reporte general\n`5` → Configuración\n\n`/start` → Menú principal\n\n¿Necesitas más ayuda? Contacta: @admin_empresa",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "92956d30-a71c-4a76-b091-bdb12847d626",
+      "name": "📤 Telegram: Ayuda",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        960
+      ],
+      "webhookId": "77d35caa-7ff4-4134-9a4c-f2fd4218bd9d",
+      "credentials": {
+        "telegramApi": {
+          "id": "9zvcB4Qz8DGXLDcL",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "🤔 No entendí tu mensaje.\n\nEscribe /start para ver el menú principal.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "ec40a139-2267-42fd-b9ee-31266f07fecf",
+      "name": "📤 Telegram: No Entendido",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        1120
+      ],
+      "webhookId": "5696ffaf-5fb4-4a2e-989c-4b6d94bd99e6",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('🔧 Extraer Datos del Mensaje').first().json.chatId }}",
+        "text": "⛔ *Acceso denegado.*\n\nTu usuario está desactivado. Contacta al administrador.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "2175862d-1ddf-4478-9e06-7d54777e3e04",
+      "name": "Telegram: Bloqueado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -384,
+        -96
+      ],
+      "webhookId": "a309d758-a2d9-40a4-8654-de0f283cd724",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "✅ Tipo: *{{ $json.sesionData.tipo }}*\n\nSelecciona la *prioridad*:\n\n`1.` 🔴 Alta\n`2.` 🟡 Media\n`3.` 🟢 Baja\n`9.` ❌ Cancelar",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "fe312c0d-2b7f-4861-a14f-956e0a5cddb7",
+      "name": "Telegram: Pedir Prioridad",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        704,
+        -128
+      ],
+      "webhookId": "b7f32e31-4a4e-408a-a4ad-5eb2956b4e27",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "USUARIOS",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "telegram_user",
+              "lookupValue": "={{ $json.username }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "78e8d86f-be3d-4c08-9730-2d0d662c2b39",
+      "name": "Sheets: Guardar Sesión PRIORIDAD",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        -224
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "➕ *Crear Solicitud*\n\nSelecciona el *tipo*:\n\n`1.` 💻 Soporte técnico\n`2.` 📝 Solicitud administrativa\n`3.` ❓ Consulta general\n`9.` ❌ Cancelar",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "69e159d3-dc2c-4476-bc18-f3c3b7012d84",
+      "name": "Telegram: Pedir Tipo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        -192
+      ],
+      "webhookId": "f138b2de-dab4-45a9-8224-f9fcb21df242",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('🔧 Extraer Datos del Mensaje').first().json.chatId }}",
+        "text": "❌ *Ticket no encontrado.*\n\nVerifica el número e intenta de nuevo.\nEscribe /start para volver al menú.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "fb005b2b-9567-40cc-b60d-8fe3e8a51de2",
+      "name": "Telegram: Ticket No Existe",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        608
+      ],
+      "webhookId": "29127d81-c1e3-47c8-85d3-c9c9cebcb12d",
+      "credentials": {
+        "telegramApi": {
+          "id": "9zvcB4Qz8DGXLDcL",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "SOLICITUDES",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "58d4e557-7d00-4f55-8919-cf9fc376e3be",
+      "name": "Sheets: Todos Tickets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        752
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "SOLICITUDES",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "creado_por",
+              "lookupValue": "={{ $json.username }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "98fea1e4-93d9-4216-8262-642743476c26",
+      "name": "Sheets: Mis Tickets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        32,
+        560
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SPREADSHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "USUARIOS",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "telegram_user",
+              "lookupValue": "={{ $json.username }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bd419b16-8bef-4743-8dc4-581f47bf60d6",
+      "name": "Sheets: Sesión CONSULTAR",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        32,
+        240
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yJCKMpMkeLMXoedG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('🔧 Extraer Datos del Mensaje').first().json.chatId }}",
+        "text": "👋 *¡Bienvenido/a a HelpDeskBot!*\n\nHola *{{ $('🔧 Extraer Datos del Mensaje').first().json.firstName }}*, tu cuenta fue registrada automáticamente.\n\nEscribe /start para ver el menú.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "632e8b64-d39a-4301-844a-a2c906121148",
+      "name": "Telegram: Bienvenida",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -384,
+        352
+      ],
+      "webhookId": "85128102-e8f6-49e5-984b-38752fcea670",
+      "credentials": {
+        "telegramApi": {
+          "id": "uO5FVQndF9M5B4Cz",
+          "name": "accounn"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "❌ *Solicitud cancelada.*\n\nEscribe /start para volver al menú.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "1f29d641-e00c-4a6c-b688-44718a9b1960",
+      "name": "Telegram: Cancelado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        496,
+        128
+      ],
+      "webhookId": "bb798883-d4ce-44dc-8fa3-1be09e3968e3",
+      "credentials": {
+        "telegramApi": {
+          "id": "9zvcB4Qz8DGXLDcL",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('🔧 Extraer Datos del Mensaje').first().json.chatId }}",
+        "text": "📋 *Estado del Ticket*\n\n🎫 ID: `{{ $json.id_ticket }}`\n📌 Tipo: {{ $json.tipo }}\n⚡ Prioridad: {{ $json.prioridad }}\n📝 Descripción: {{ $json.descripcion }}\n🔄 Estado: *{{ $json.estado }}*\n👤 Creado por: {{ $json.creado_por }}\n📅 Fecha: {{ $json.fecha_creacion }}\n\nEscribe /start para volver al menú.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "21c5751f-8a34-4b3a-bdb1-6bf0e8289f36",
+      "name": "Telegram: Estado Ticket",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        464
+      ],
+      "webhookId": "edec93de-8dbb-4918-9dee-8c7b8060497b",
+      "credentials": {
+        "telegramApi": {
+          "id": "9zvcB4Qz8DGXLDcL",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "📩 Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "🔧 Extraer Datos del Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Extraer Datos del Mensaje": {
+      "main": [
+        [
+          {
+            "node": "📋 Sheets: Buscar Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Sheets: Buscar Usuario": {
+      "main": [
+        [
+          {
+            "node": "🔀 IF: ¿Usuario Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 IF: ¿Usuario Existe?": {
+      "main": [
+        [
+          {
+            "node": "🔀 IF: ¿Usuario Activo?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📊 Sheets: Registrar Nuevo Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Sheets: Registrar Nuevo Usuario": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Bienvenida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 IF: ¿Usuario Activo?": {
+      "main": [
+        [
+          {
+            "node": "🧠 Gestor de Sesión",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: Bloqueado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Gestor de Sesión": {
+      "main": [
+        [
+          {
+            "node": "🔀 Switch: Router Principal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Switch: Router Principal": {
+      "main": [
+        [
+          {
+            "node": "📤 Telegram: Menú Principal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📊 Sheets: Guardar Sesión TIPO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🔧 Procesar Tipo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🔧 Procesar Prioridad",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🔧 Procesar Descripción",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🔧 Procesar Confirmación",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sheets: Sesión CONSULTAR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📊 Sheets: Buscar Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sheets: Mis Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sheets: Todos Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📤 Telegram: Ayuda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📤 Telegram: No Entendido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Sheets: Guardar Sesión TIPO": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Pedir Tipo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Procesar Tipo": {
+      "main": [
+        [
+          {
+            "node": "🔀 Switch: ¿Tipo Válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Switch: ¿Tipo Válido?": {
+      "main": [
+        [
+          {
+            "node": "Sheets: Guardar Sesión PRIORIDAD",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📤 Telegram: Tipo Inválido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: Cancelado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Procesar Prioridad": {
+      "main": [
+        [
+          {
+            "node": "🔀 Switch: ¿Prioridad Válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Switch: ¿Prioridad Válida?": {
+      "main": [
+        [
+          {
+            "node": "📊 Sheets: Guardar Sesión DESCRIPCION",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📤 Telegram: Prioridad Inválida",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: Cancelado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Sheets: Guardar Sesión DESCRIPCION": {
+      "main": [
+        [
+          {
+            "node": "📤 Telegram: Pedir Descripción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Procesar Descripción": {
+      "main": [
+        [
+          {
+            "node": "🔀 Switch: ¿Desc Válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Switch: ¿Desc Válida?": {
+      "main": [
+        [
+          {
+            "node": "🔧 Preparar Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📤 Telegram: Desc Corta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: Cancelado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Preparar Ticket": {
+      "main": [
+        [
+          {
+            "node": "📊 Sheets: Guardar Sesión CONFIRMACION",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Sheets: Guardar Sesión CONFIRMACION": {
+      "main": [
+        [
+          {
+            "node": "📤 Telegram: Confirmar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Procesar Confirmación": {
+      "main": [
+        [
+          {
+            "node": "🔀 Switch: ¿Confirmado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Switch: ¿Confirmado?": {
+      "main": [
+        [
+          {
+            "node": "📊 Sheets: Guardar Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: Cancelado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Sheets: Guardar Ticket": {
+      "main": [
+        [
+          {
+            "node": "📊 Sheets: Limpiar Sesión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Sheets: Limpiar Sesión": {
+      "main": [
+        [
+          {
+            "node": "📤 Telegram: Ticket OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Sheets: Buscar Ticket": {
+      "main": [
+        [
+          {
+            "node": "🔀 Switch: ¿Ticket Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Switch: ¿Ticket Existe?": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Estado Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: Ticket No Existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Formatear Mis Tickets": {
+      "main": [
+        [
+          {
+            "node": "📤 Telegram: Mis Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Calcular Reporte": {
+      "main": [
+        [
+          {
+            "node": "📤 Telegram: Reporte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets: Guardar Sesión PRIORIDAD": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Pedir Prioridad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets: Todos Tickets": {
+      "main": [
+        [
+          {
+            "node": "🔧 Calcular Reporte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets: Mis Tickets": {
+      "main": [
+        [
+          {
+            "node": "🔧 Formatear Mis Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets: Sesión CONSULTAR": {
+      "main": [
+        [
+          {
+            "node": "📤 Telegram: Pedir Ticket ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7105d266-5bbc-4b03-a9ed-cd05158d4b53",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9bcbdf40d4833d22c6fed32febd62c190f5eaac2b31fefdd1e4aae44cbc7698b"
+  },
+  "id": "NGeSFdukHDRpD2oF",
+  "tags": [
+    {
+      "updatedAt": "2026-03-11T22:38:07.893Z",
+      "createdAt": "2026-03-11T22:38:07.893Z",
+      "id": "Uigfeow0ajR9W56q",
+      "name": "HelpDeskBot"
+    },
+    {
+      "updatedAt": "2026-03-12T01:46:45.899Z",
+      "createdAt": "2026-03-12T01:46:45.899Z",
+      "id": "qGFGiBQpxx2JgmfF",
+      "name": "Sesion"
+    }
+  ]
+}
