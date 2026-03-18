@@ -1,4 +1,4 @@
-# HelpDeskBot
+# HelpDeskBot Examen
 
 Bot de Telegram para gestionar tickets de soporte interno. Hecho con n8n + Google Sheets. Sin base de datos real, sin servidor, sin IA.
 
