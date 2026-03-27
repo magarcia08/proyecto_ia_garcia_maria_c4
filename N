@@ -1,0 +1,111 @@
+
+CREATE DATABASE IF NOT EXISTS estudio_examen;
+
+USE estudio_examen;
+
+CREATE TABLE empleados (
+  id_empleado  INT AUTO_INCREMENT PRIMARY KEY,
+  nombre   VARCHAR(100) NOT NULL,
+  apellido  VARCHAR(100) NOT NULL,
+  tipo_empleado ENUM('ATS', 'auxiliar_enfermeria', 'celador', 'administrativo') NOT NULL
+);
+
+CREATE TABLE medicos (
+  id_medico INT AUTO_INCREMENT PRIMARY KEY,
+  id_empleado_supervisor INT,
+  nombre VARCHAR(100) NOT NULL,
+  apellido VARCHAR(100) NOT NULL,
+  tipo  ENUM('titular', 'interino', 'sustituto') NOT NULL,
+  especialidad VARCHAR(100),
+  FOREIGN KEY (id_empleado_supervisor) REFERENCES empleados(id_empleado)
+);
+
+CREATE TABLE paciente (
+  id_paciente      INT AUTO_INCREMENT PRIMARY KEY,
+  id_medico_asignado INT,
+  nombre           VARCHAR(100) NOT NULL,
+  apellido         VARCHAR(100) NOT NULL,
+  fecha_nacimiento DATE,
+  FOREIGN KEY (id_medico_asignado) REFERENCES medicos(id_medico)
+);
+
+CREATE TABLE horarios_consulta (
+  id_horario INT AUTO_INCREMENT PRIMARY KEY,
+  id_medico INT NOT NULL,
+  dia_semana ENUM('Lunes','Martes','Miercoles', 'Jueves','Viernes') NOT NULL,
+  hora_inicio TIME NOT NULL,
+  hora_fin TIME NOT NULL,
+  FOREIGN KEY (id_medico) REFERENCES medicos(id_medico)
+);
+
+CREATE TABLE sustituciones (
+  id_sustitucion INT AUTO_INCREMENT PRIMARY KEY,
+  id_medico_titular  INT NOT NULL,
+  id_medico_sustituto INT NOT NULL,
+  fecha_inicio   DATE NOT NULL,
+  fecha_fin   DATE NOT NULL,
+  FOREIGN KEY (id_medico_titular)   REFERENCES medicos(id_medico),
+  FOREIGN KEY (id_medico_sustituto) REFERENCES medicos(id_medico)
+);
+
+CREATE TABLE vacaciones (
+  id_vacacion  INT AUTO_INCREMENT PRIMARY KEY,
+  id_persona   INT NOT NULL,
+  tipo_persona ENUM('medico', 'empleado') NOT NULL,
+  dias  INT NOT NULL,
+  estado  ENUM('planificada', 'disfrutada') NOT NULL,
+  fecha_inicio DATE,
+  fecha_fin DATE
+);
+
+
+USE estudio_examen;
+
+
+INSERT INTO empleados (nombre, apellido, tipo_empleado) VALUES
+  ('María',   'López',    'administrativo'),
+  ('Carlos',  'García',   'ATS'),
+  ('Ana',     'Martínez', 'auxiliar_enfermeria'),
+  ('Luis',    'Rodríguez','celador');
+
+INSERT INTO medicos (id_empleado_supervisor, nombre, apellido, tipo, especialidad) VALUES
+  (1, 'Pedro',   'Sánchez',  'titular',   'Medicina General'),
+  (1, 'Laura',   'Jiménez',  'titular',   'Pediatría'),
+  (2, 'Roberto', 'Torres',   'interino',  'Medicina General'),
+  (2, 'Elena',   'Flores',   'sustituto', 'Pediatría'),
+  (1, 'Miguel',  'Herrera',  'titular',   'Cardiología');
+
+INSERT INTO paciente (id_medico_asignado, nombre, apellido, fecha_nacimiento) VALUES
+  (1, 'Juan',    'Pérez',   '1985-03-12'),
+  (1, 'Sofía',   'Ruiz',    '1992-07-22'),
+  (1, 'Diego',   'Molina',  '1978-11-05'),
+  (2, 'Carmen',  'Ortega',  '2010-01-30'),
+  (2, 'Tomás',   'Castro',  '2015-06-18'),
+  (5, 'Isabel',  'Vargas',  '1960-09-14'),
+  (5, 'Ricardo', 'Moreno',  '1955-12-03'),
+  (3, 'Lucía',   'Navarro', '1990-04-25');
+
+INSERT INTO horarios_consulta (id_medico, dia_semana, hora_inicio, hora_fin) VALUES
+  (1, 'Lunes',     '08:00', '14:00'),
+  (1, 'Miercoles', '08:00', '14:00'),
+  (1, 'Viernes',   '08:00', '13:00'),
+  (2, 'Martes',    '09:00', '15:00'),
+  (2, 'Jueves',    '09:00', '15:00'),
+  (3, 'Lunes',     '10:00', '14:00'),
+  (3, 'Viernes',   '10:00', '14:00'),
+  (5, 'Lunes',     '07:00', '14:00'),
+  (5, 'Martes',    '07:00', '14:00'),
+  (5, 'Miercoles', '07:00', '14:00');
+
+INSERT INTO sustituciones (id_medico_titular, id_medico_sustituto, fecha_inicio, fecha_fin) VALUES
+  (1, 4, '2026-03-01', '2026-04-01'),
+  (2, 3, '2026-01-15', '2026-02-15'),
+  (5, 4, '2025-11-01', '2025-12-01');
+
+INSERT INTO vacaciones (id_persona, tipo_persona, dias, estado, fecha_inicio, fecha_fin) VALUES
+  (1, 'medico',   15, 'planificada', '2026-07-01', '2026-07-15'),
+  (1, 'medico',   10, 'disfrutada',  '2025-08-01', '2025-08-10'),
+  (2, 'medico',   22, 'planificada', '2026-08-01', '2026-08-22'),
+  (1, 'empleado', 12, 'disfrutada',  '2025-09-01', '2025-09-12'),
+  (2, 'empleado', 8,  'disfrutada',  '2025-10-01', '2025-10-08'),
+  (3, 'empleado', 25, 'planificada', '2026-06-01', '2026-06-25');
