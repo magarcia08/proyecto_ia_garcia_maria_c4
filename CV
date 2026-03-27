@@ -1,0 +1,141 @@
+
+USE estudio_examen;
+
+
+
+
+-- 1. Ver todos los médicos con sus pacientes asignados.
+SELECT m.nombre, m.apellido, p.nombre, p.apellido
+FROM medicos m
+JOIN paciente p ON m.id_medico = p.id_medico_asignado;
+
+
+-- 2. Ver todos los empleados y sus vacaciones.
+SELECT e.nombre, e.apellido, v.dias, v.estado
+FROM empleados e
+JOIN vacaciones v ON e.id_empleado = v.id_persona
+WHERE v.tipo_persona = 'empleado';
+
+
+-- 3. Ver los horarios de consulta de cada médico.
+SELECT m.nombre, m.apellido, h.dia_semana, h.hora_inicio, h.hora_fin
+FROM medicos m
+JOIN horarios_consulta h ON m.id_medico = h.id_medico;
+
+
+-- 4. Ver las sustituciones con el nombre del titular y el sustituto.
+SELECT t.nombre  AS titular,
+       s2.nombre AS sustituto,
+       s.fecha_inicio,
+       s.fecha_fin
+FROM sustituciones s
+JOIN medicos t  ON s.id_medico_titular   = t.id_medico
+JOIN medicos s2 ON s.id_medico_sustituto = s2.id_medico;
+
+
+-- 5. Ver los médicos que están en sustitución ahora mismo.
+SELECT m.nombre, m.apellido
+FROM medicos m
+JOIN sustituciones s ON m.id_medico = s.id_medico_sustituto
+WHERE CURDATE() BETWEEN s.fecha_inicio AND s.fecha_fin;
+
+
+-- 6. Ver los horarios del lunes de todos los médicos.
+SELECT m.nombre, m.apellido, h.hora_inicio, h.hora_fin
+FROM medicos m
+JOIN horarios_consulta h ON m.id_medico = h.id_medico
+WHERE h.dia_semana = 'Lunes';
+
+
+-- 7. Contar cuántos pacientes tiene cada médico.
+SELECT m.nombre, m.apellido, COUNT(p.id_paciente) AS total_pacientes
+FROM medicos m
+LEFT JOIN paciente p ON m.id_medico = p.id_medico_asignado
+GROUP BY m.id_medico;
+
+
+-- 8. Ver los empleados con vacaciones disfrutadas.
+SELECT e.nombre, e.apellido, v.dias
+FROM empleados e
+JOIN vacaciones v ON e.id_empleado = v.id_persona
+WHERE v.tipo_persona = 'empleado'
+  AND v.estado = 'disfrutada';
+
+
+-- 9. Ver los médicos de tipo sustituto.
+SELECT nombre, apellido, especialidad
+FROM medicos
+WHERE tipo = 'sustituto';
+
+
+-- 10. Ver todos los pacientes con su fecha de nacimiento.
+SELECT nombre, apellido, fecha_nacimiento
+FROM paciente
+ORDER BY fecha_nacimiento;
+
+
+-- 11. Ver los empleados supervisores y los médicos que supervisan.
+SELECT e.nombre AS supervisor, m.nombre AS medico, m.especialidad
+FROM empleados e
+JOIN medicos m ON e.id_empleado = m.id_empleado_supervisor;
+
+
+-- 12. Ver los médicos titulares con sus pacientes.
+SELECT m.nombre, m.apellido, p.nombre, p.apellido
+FROM medicos m
+JOIN paciente p ON m.id_medico = p.id_medico_asignado
+WHERE m.tipo = 'titular';
+
+
+-- 13. Ver las vacaciones planificadas de los médicos.
+SELECT m.nombre, m.apellido, v.dias, v.fecha_inicio, v.fecha_fin
+FROM medicos m
+JOIN vacaciones v ON m.id_medico = v.id_persona
+WHERE v.tipo_persona = 'medico'
+  AND v.estado = 'planificada';
+
+
+-- 14. Contar cuántos médicos hay por tipo.
+SELECT tipo, COUNT(*) AS total
+FROM medicos
+GROUP BY tipo;
+
+
+-- 15. Ver los horarios de un médico específico (id = 1).
+SELECT dia_semana, hora_inicio, hora_fin
+FROM horarios_consulta
+WHERE id_medico = 1;
+
+
+-- 16. Contar cuántas sustituciones ha hecho cada médico sustituto.
+SELECT m.nombre, m.apellido, COUNT(s.id_sustitucion) AS total_sustituciones
+FROM medicos m
+LEFT JOIN sustituciones s ON m.id_medico = s.id_medico_sustituto
+GROUP BY m.id_medico;
+
+
+-- 17. Ver los pacientes nacidos antes del año 1975.
+SELECT nombre, apellido, fecha_nacimiento
+FROM paciente
+WHERE fecha_nacimiento < '1975-01-01'
+ORDER BY fecha_nacimiento;
+
+
+-- 18. Ver todos los empleados de tipo administrativo.
+SELECT nombre, apellido
+FROM empleados
+WHERE tipo_empleado = 'administrativo';
+
+
+-- 19. Ver los médicos que tienen pacientes asignados ahora en sustitución.
+SELECT m.nombre, m.apellido, p.nombre, p.apellido
+FROM medicos m
+JOIN sustituciones s ON m.id_medico  = s.id_medico_sustituto
+JOIN paciente p      ON m.id_medico  = p.id_medico_asignado
+WHERE CURDATE() BETWEEN s.fecha_inicio AND s.fecha_fin;
+
+
+-- 20. Ver los médicos con su especialidad ordenados alfabéticamente.
+SELECT nombre, apellido, especialidad
+FROM medicos
+ORDER BY nombre ASC;
